@@ -30,6 +30,14 @@ class NotifyProvider
     :technical_failure
   end
 
+  def get_notify_email_status(id)
+    puts "Notification details for email with id #{id}"
+    notification = client.get_notification(id)
+
+    puts "Status: #{notification.status}"
+    puts "Response: #{notification.response}"
+  end
+
 private
 
   attr_reader :client, :template_id
