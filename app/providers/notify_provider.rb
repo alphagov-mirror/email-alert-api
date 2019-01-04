@@ -38,6 +38,22 @@ class NotifyProvider
     puts "Response: #{notification.response}"
   end
 
+  def get_notify_multiple_email_status(reference)
+    #reference is the DeliveryAttempt.id
+    puts "Query Notify for emails with the reference #{reference}"
+
+    response = client.get_notifications(
+      template_type: 'email',
+      reference: reference
+    )
+
+    puts "Response =  #{response}"
+
+    count = response.collection.count
+
+    puts "Found #{count} results"
+  end
+
 private
 
   attr_reader :client, :template_id
