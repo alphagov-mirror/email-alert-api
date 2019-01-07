@@ -1,31 +1,4 @@
 RSpec.describe NotifyProvider do
-  describe ".get_notify_email_status" do
-    before do
-      stub_request(
-        :get,
-        "https://fake-notify/v2/notifications/#{id}"
-      ).to_return(body: mocked_response.to_json)
-    end
-
-    let(:id) {
-      "1"
-    }
-
-    let(:mocked_response) {
-      attributes_for(:client_notification)[:body]
-    }
-
-    it "returns the response object for an email id" do
-      client = instance_double("Notifications::Client")
-      allow(client).to receive(:get_notification).and_return(mocked_response)
-
-      notification = client.get_notification(id)
-
-      expect(notification["status"]).to eq("delivered")
-      expect(notification["reference"]).to eq("your_reference_string")
-    end
-  end
-
   describe ".call" do
     let(:template_id) { EmailAlertAPI.config.notify.fetch(:template_id) }
     let(:arguments) do
