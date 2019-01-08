@@ -177,7 +177,7 @@ FactoryBot.define do
   end
 
   factory :client_notification,
-          class: Notifications::Client::Notification do
+    class: Notifications::Client::Notification do
     initialize_with do
       new(body)
     end
@@ -190,11 +190,11 @@ FactoryBot.define do
         "type" => "email",
         "status" => "delivered",
         "template" =>
-            {
-              "id" => "cb633abc-6ae6-4843-ae6f-82ca500b6de2",
-              "uri" => "/v2/templates/5e427b42-4e98-46f3-a047-32c4a87d26bb",
-              "version" => 1
-            },
+          {
+            "id" => "cb633abc-6ae6-4843-ae6f-82ca500b6de2",
+            "uri" => "/v2/templates/5e427b42-4e98-46f3-a047-32c4a87d26bb",
+            "version" => 1
+          },
         "body" => "Body of the message",
         "subject" => "Changes to this document",
         "created_at" => "2019-01-29T11:12:30.12354Z",
@@ -206,7 +206,7 @@ FactoryBot.define do
   end
 
   factory :client_notifications_collection,
-          class: Notifications::Client::NotificationsCollection do
+    class: Notifications::Client::NotificationsCollection do
     initialize_with do
       new(body)
     end
@@ -221,6 +221,24 @@ FactoryBot.define do
           attributes_for(:client_notification)[:body]
         }
       }
+    end
+  end
+
+  factory :client_request_error,
+    class: Notifications::Client::RequestError do
+    code '403'
+    body do
+      {
+        'status_code' => 400,
+        'errors' => ['error' => 'BadRequest',
+                      'message' => 'Invalid token: expired']
+      }
+    end
+
+    initialize_with do
+      new(
+        OpenStruct.new(code: code, body: body.to_json)
+      )
     end
   end
 end

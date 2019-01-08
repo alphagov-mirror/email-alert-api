@@ -17,17 +17,11 @@ module Reports
       puts "Query Notify for emails with the reference #{reference}"
 
       response = @client.get_notifications(
-        {
-          template_type: "email",
-          reference: reference
-        }
+        template_type: "email",
+        reference: reference
       )
 
-      # puts "Response =  #{response}"
       if response.is_a?(Notifications::Client::NotificationsCollection)
-        count = response.collection.count
-
-
         response.collection.each do |notification|
           puts <<~TEXT
             -------------------------------------------
@@ -39,15 +33,13 @@ module Reports
           TEXT
         end
 
-      elsif response.is_a?(Notifications::Client::RequestError)
-        puts "Query for #{reference} returns error code #{error.code}, #{error.message}"
       else
-        puts "Reference not found"
+        puts "No results returned"
       end
-     end
+    end
   end
 
-  private
+private
 
-    attr_reader :client, :template_id
+  attr_reader :client, :template_id
 end
