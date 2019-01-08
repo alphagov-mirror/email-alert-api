@@ -27,6 +27,7 @@ module Reports
       if response.is_a?(Notifications::Client::NotificationsCollection)
         count = response.collection.count
 
+
         response.collection.each do |notification|
           puts <<~TEXT
             -------------------------------------------

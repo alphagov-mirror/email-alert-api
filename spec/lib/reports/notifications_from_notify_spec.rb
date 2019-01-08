@@ -34,22 +34,17 @@ RSpec.describe Reports::NotificationsFromNotify do
       it "prints details about one notification" do
         # We generate a unique reference for each email sent so we should only
         # expect to return one notification within the collection
-
         client = instance_double("Notifications::Client")
+        notification = notifications_collection.collection.first
+
         allow(client).to receive(:get_notifications).and_return(notifications_collection)
 
-        expect(client).to receive(:get_notifications).with(
-          {
-            template_type: "email",
-            reference: reference
-          }
-        )
+        described_class.call(reference)
 
-        response = described_class.call(reference)
-
-        notification = notifications_collection.collection.first
-        expect(response).to output(
+        expect{ described_class.call(reference) }
+        .to output(
           <<~TEXT
+          Query Notify for emails with the reference #{reference}
           -------------------------------------------
           Notification ID: #{notification.id}
           Status: #{notification.status}
