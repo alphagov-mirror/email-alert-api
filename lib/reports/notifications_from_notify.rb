@@ -32,9 +32,11 @@ module Reports
             completed_at: #{notification.completed_at}
           TEXT
         end
-
-      else
-        puts "No results returned"
+      end
+    rescue StandardError => e
+      if e.is_a?(Notifications::Client::RequestError)
+        error = e
+        puts "Returns request error #{error.code}, message: #{error.message}"
       end
     end
   end

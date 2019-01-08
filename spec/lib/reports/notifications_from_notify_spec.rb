@@ -66,11 +66,17 @@ RSpec.describe Reports::NotificationsFromNotify do
 
       it "returns a request error" do
         client = instance_double("Notifications::Client")
+        error = client_request_error
         allow(client).to receive(:get_notifications).and_return(client_request_error)
 
         expect {
           described_class.call(reference)
-        }.to raise_error(Notifications::Client::RequestError)
+        }.to output(
+          <<~TEXT
+            Query Notify for emails with the reference #{reference}
+            Returns request error #{error.code}, message: #{error.message}
+          TEXT
+        ).to_stdout
       end
     end
   end
