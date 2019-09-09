@@ -142,6 +142,7 @@ ActiveRecord::Schema.define(version: 2019_09_11_115859) do
     t.string "slug", null: false
     t.string "url"
     t.string "description", default: "", null: false
+    t.string "list_group_id"
     t.index ["document_type"], name: "index_subscriber_lists_on_document_type"
     t.index ["email_document_supertype"], name: "index_subscriber_lists_on_email_document_supertype"
     t.index ["government_document_supertype"], name: "index_subscriber_lists_on_government_document_supertype"
