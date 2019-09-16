@@ -3,7 +3,7 @@ class SubscribersController < ApplicationController
     subscriptions = Subscription.active.
       includes(:subscriber_list).
       where(subscriber: subscriber).
-      order('subscriber_lists.title').
+      order(:created_at).
       as_json(include: :subscriber_list)
 
     render json: { subscriber: subscriber.as_json, subscriptions: subscriptions }
