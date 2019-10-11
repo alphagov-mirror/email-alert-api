@@ -1,8 +1,7 @@
 module Reports
   class ContentChangeEmailFailures
-    def initialize(content_change)
-      @content_change = content_change
-      @failed_emails = failed_emails
+    def initialize(content_changes)
+      @content_changes = content_changes
     end
 
     def self.call(*args)
@@ -10,27 +9,30 @@ module Reports
     end
 
     def call
-      puts <<~HEADING
-        #{@failed_emails.count} Email failures for Content Change #{@content_change.id}
-        -------------------------------------------
+      @content_changes.each do |content_change|
+        failed_emails = failed_emails(content_change)
+        puts <<~HEADING
 
-      HEADING
+          ------------------------------------------------------------------------
+          #{failed_emails.count} Email failures for Content Change #{content_change.id}
+          ------------------------------------------------------------------------
+        HEADING
 
-      @failed_emails.each do |email|
-        puts <<~EMAIL
-          Email Id:       #{email.id}
-          Failure Reason: #{email.failure_reason}
+        failed_emails.each do |email|
+          puts <<~EMAIL
 
-          -------------------------------------------
-
-        EMAIL
+            Email Id:       #{email.id}
+            Failure Reason: #{email.failure_reason}
+            ------------------------------------------------------------------------
+          EMAIL
+        end
       end
     end
 
   private
 
-    def failed_emails
-      subscription_contents_ids = @content_change
+    def failed_emails(content_change)
+      subscription_contents_ids = content_change
                                   .subscription_contents
                                   .pluck(:id)
       email_ids = SubscriptionContent
