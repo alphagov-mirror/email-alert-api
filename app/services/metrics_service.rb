@@ -1,4 +1,6 @@
 class MetricsService
+  include OverallMetricsService
+
   class << self
     def sent_to_notify_successfully
       increment("notify.email_send_request.success")
@@ -65,11 +67,11 @@ class MetricsService
     end
 
     def delivery_attempt_pending_status_total(total)
-      gauge("delivery_attempt.pending_status_total", total)
+      OverallMetricsService.gauge("delivery_attempt.pending_status_total", total)
     end
 
     def delivery_attempt_total(total)
-      gauge("delivery_attempt.total", total)
+      OverallMetricsService.gauge("delivery_attempt.total", total)
     end
 
   private
@@ -84,18 +86,6 @@ class MetricsService
 
     def timing(namespace, difference)
       GovukStatsd.timing(namespace, difference)
-    end
-
-    def gauge(stat, metric)
-      statsd.gauge(stat, metric)
-    end
-
-    def statsd
-      @statsd ||= begin
-        statsd = Statsd.new
-        statsd.namespace = "govuk.email-alert-api"
-        statsd
-      end
     end
   end
 end

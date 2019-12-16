@@ -6,7 +6,7 @@ RSpec.describe StatusUpdateWorker do
       before do
         3.times { create(:delivery_attempt, status: 0, created_at: 40.minutes.ago) }
         2.times { create(:delivery_attempt, status: 1, created_at: 20.minutes.ago) }
-        allow(Statsd).to receive(:gauge)
+        allow(OverallMetricsService.statsd).to receive(:gauge)
       end
 
       it "records a metric for the total number of pending delivery attempts" do
@@ -20,10 +20,8 @@ RSpec.describe StatusUpdateWorker do
       end
 
       it "sends the correct values to statsd" do
-        expect(MetricsService).to receive(:statsd).and_return(statsd).twice
-
-        expect(statsd).to receive(:gauge).with("delivery_attempt.total", 5)
-        expect(statsd).to receive(:gauge).with("delivery_attempt.pending_status_total", 3)
+        expect(OverallMetricsService.statsd).to receive(:gauge).with("delivery_attempt.total", 5)
+        expect(OverallMetricsService.statsd).to receive(:gauge).with("delivery_attempt.pending_status_total", 3)
 
         described_class.new.perform
       end
