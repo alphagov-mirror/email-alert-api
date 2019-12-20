@@ -15,9 +15,10 @@ Dir[Rails.root.join("spec/support/**/*.rb")].each { |file| require file }
 RSpec.configure do |config|
   config.disable_monkey_patching!
   config.use_transactional_fixtures = true
+  config.include AuthenticationHelpers, type: :request
   config.include FactoryBot::Syntax::Methods
 
-  config.after do
+  config.after type: :request do
     logout
   end
 end
