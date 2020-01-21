@@ -27,7 +27,6 @@ RSpec.describe "Healthcheck", type: :request do
       redis_connectivity:    { status: "ok" },
       sidekiq_queue_latency: hash_including(status: "ok", queues: a_kind_of(Hash)),
       sidekiq_queue_size:    hash_including(status: "ok", queues: a_kind_of(Hash)),
-      sidekiq_retry_size:    hash_including(status: "ok", value: 0),
     )
   end
 end
