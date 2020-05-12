@@ -17,7 +17,33 @@ namespace :manage do
     end
   end
 
-  desc "Unsubscribe a single subscriber"
+  desc "Unsubscribe a subscriber from a single subscription"
+  task :unsubscribe_single_subscription, %i[email_address subscriber_list_slug] => :environment do |_t, args|
+    email_address = args[:email_address]
+    subscriber = Subscriber.find_by_address(email_address)
+    subscriber_list = SubscriberList.find_by(slug: subscriber_list_slug)
+    if subscriber.nil?
+      puts "Subscriber #{email_address} not found"
+    elsif subscriber_list.nil?
+      puts "Subscriber list #{subscriber_list_slug} not found"
+    elsif !(subscriber.subscriptions.map(&:subscriber_list_id).include? subscriber_list.id)
+      puts "Subscriber #{email_address} does not appear to be signed up for #{subscriber_list_slug}"
+    else
+      latest_subscription = subscriber
+        .subscriptions
+        .filter { |subscription| subscription.subscriber_list_id == subscriber_list.id }
+        .last
+      if latest_subscription.ended_at.present?
+        puts "Subscriber #{email_address} already unsubscribed from " \
+             "#{subscriber_list_slug} at #{latest_subscription.ended_at} (#{latest_subscription.ended_reason})"
+      else
+        puts "Unsubscribing from #{email_address} from #{subscriber_list_slug}"
+        UnsubscribeService.subscription!(latest_subscription, :unsubscribed)
+      end
+    end
+  end
+
+  desc "Unsubscribe a subscriber from all subscriptions"
   task :unsubscribe_single, [:email_address] => :environment do |_t, args|
     email_address = args[:email_address]
     subscriber = Subscriber.find_by_address(email_address)
