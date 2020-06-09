@@ -38,32 +38,36 @@ RSpec.describe UnpublishHandlerService do
     end
     it "uses the redirection in the body of the email" do
       expect(DeliveryRequestService).to receive(:call)
-          .with(email: having_attributes(body: include(@redirect.url, @redirect.title))).twice
+        .with(hash_including(email: having_attributes(body: include(@redirect.url, @redirect.title))))
+        .twice
       described_class.call(@content_id, @redirect)
     end
     it "contains a link to manage emails" do
       expect(DeliveryRequestService).to receive(:call)
-        .with(email: having_attributes(body: include("address=test%40example.com"))).once
+        .with(hash_including(email: having_attributes(body: include("address=test%40example.com"))))
+        .once
       expect(DeliveryRequestService).to receive(:call)
-        .with(email: having_attributes(body: include("address=govuk-email-courtesy-copies%40digital.cabinet-office.gov.uk"))).once
+        .with(hash_including(email: having_attributes(body: include("address=govuk-email-courtesy-copies%40digital.cabinet-office.gov.uk"))))
+        .once
       described_class.call(@content_id, @redirect)
     end
     it "sends the email and a courtesy email to the DeliverRequestWorker" do
       expect(DeliveryRequestService).to receive(:call)
-          .with(email: having_attributes(
-            subject: "Update from GOV.UK – First Subscription",
-            address: "test@example.com",
-          ))
+        .with(hash_including(email: having_attributes(
+          subject: "Update from GOV.UK – First Subscription",
+          address: "test@example.com",
+        )))
       expect(DeliveryRequestService).to receive(:call)
-          .with(email: having_attributes(
-            subject: "Update from GOV.UK – First Subscription",
-            address: Email::COURTESY_EMAIL,
-          ))
+        .with(hash_including(email: having_attributes(
+          subject: "Update from GOV.UK – First Subscription",
+          address: Email::COURTESY_EMAIL,
+        )))
       described_class.call(@content_id, @redirect)
     end
     it "sends an email with some specified text" do
       expect(DeliveryRequestService).to receive(:call)
-          .with(email: having_attributes(body: include(body))).twice
+        .with(hash_including(email: having_attributes(body: include(body))))
+        .twice
       described_class.call(@content_id, @redirect)
     end
   end

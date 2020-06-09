@@ -18,24 +18,29 @@ class DeliveryRequestService
     new.call(*args)
   end
 
-  def call(email:)
+  def call(email:, time_monitor: nil)
     reference = SecureRandom.uuid
 
     address = determine_address(email, reference)
+    time_monitor&.record("determine_address")
     return false if address.nil?
 
-    delivery_attempt = create_delivery_attempt(email, reference)
+    delivery_attempt = create_delivery_attempt(email, reference, time_monitor)
 
     status = MetricsService.email_send_request(provider_name) do
       call_provider(address, reference, email)
     end
 
+    time_monitor&.record("called_provider")
+
     return true if status == :sending
 
     ActiveRecord::Base.transaction do
       delivery_attempt.update!(status: status, completed_at: Time.zone.now)
+      time_monitor&.record("updated_delivery_attempt")
       MetricsService.delivery_attempt_status_changed(status)
       UpdateEmailStatusService.call(delivery_attempt)
+      time_monitor&.record("updated_email_status")
     end
 
     true
@@ -66,10 +71,13 @@ private
     end
   end
 
-  def create_delivery_attempt(email, reference)
+  def create_delivery_attempt(email, reference, time_monitor)
     MetricsService.delivery_request_service_first_delivery_attempt do
-      record_first_attempt_metrics(email) unless DeliveryAttempt.exists?(email: email)
+      delivery_attempt_exists = DeliveryAttempt.exists?(email: email)
+      time_monitor&.record("check_delivery_attempt_exists")
+      record_first_attempt_metrics(email, time_monitor) unless delivery_attempt_exists
     end
+    time_monitor&.record("record_first_delivery_attempt")
 
     MetricsService.delivery_request_service_create_delivery_attempt do
       DeliveryAttempt.create!(
@@ -77,21 +85,25 @@ private
         email: email,
         status: :sending,
         provider: provider_name,
-      )
+      ).tap do
+        time_monitor&.record("created_delivery_attempt")
+      end
     end
   end
 
-  def record_first_attempt_metrics(email)
+  def record_first_attempt_metrics(email, time_monitor)
     now = Time.now.utc
     MetricsService.email_created_to_first_delivery_attempt(email.created_at, now)
 
     content_change_id = SubscriptionContent.where(email: email)
                                            .immediate
                                            .pick(:content_change_id)
+    time_monitor&.record("find_content_change_id")
     return unless content_change_id
 
     content_change_created_at = ContentChange.where(id: content_change_id)
                                              .pick(:created_at)
+    time_monitor&.record("check_content_change_created_at")
     return unless content_change_created_at
 
     MetricsService.content_change_created_to_first_delivery_attempt(content_change_created_at, now)

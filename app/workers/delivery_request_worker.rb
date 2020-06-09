@@ -13,17 +13,30 @@ class DeliveryRequestWorker
   end
 
   def perform(email_id, queue)
+    time_monitor = TimeMonitor.new
     @email_id = email_id
     @queue = queue
 
+    time_monitor.record("init")
+
     check_rate_limit!
+
+    time_monitor.record("checked_rate_limit")
 
     email = MetricsService.delivery_request_worker_find_email do
       Email.find(email_id)
     end
+    time_monitor.record("found_email")
 
-    attempted = DeliveryRequestService.call(email: email)
-    increment_rate_limiter if attempted
+    attempted = DeliveryRequestService.call(email: email, time_monitor: time_monitor)
+    time_monitor.record("called_delivery_request_service")
+
+    if attempted
+      increment_rate_limiter
+      time_monitor.record("incremented_rate_limiter")
+    end
+
+    logger.info(time_monitor.report)
   end
 
   def self.perform_async_in_queue(*args, queue:)
@@ -65,6 +78,37 @@ private
 
   def rate_limiter
     Services.rate_limiter
+  end
+
+  class TimeMonitor
+    def initialize
+      @start_time = Time.zone.now
+      @events = {}
+    end
+
+    def record(event)
+      @events[event] = Time.zone.now
+    end
+
+    def report
+      time_taken = Time.zone.now - start_time
+
+      "Timing breakdown, total: #{format_time(time_taken)}\n#{events_breakdown}"
+    end
+
+  private
+
+    attr_reader :events, :start_time
+
+    def events_breakdown
+      events.reduce("") do |memo, (name, time)|
+        memo + "#{name}: #{format_time(time - start_time)}\n"
+      end
+    end
+
+    def format_time(time_float)
+      "#{time_float.round(4)}s"
+    end
   end
 end
 

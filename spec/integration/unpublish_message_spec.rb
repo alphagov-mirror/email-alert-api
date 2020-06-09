@@ -54,19 +54,21 @@ RSpec.describe "Sending an unpublish message", type: :request do
     end
     it "sends a message" do
       expect(DeliveryRequestService).to have_received(:call)
-        .with(email: having_attributes(
+        .with(hash_including(email: having_attributes(
           subject: "Update from GOV.UK – First Subscription",
           address: Email::COURTESY_EMAIL,
-        ))
+        )))
       expect(DeliveryRequestService).to have_received(:call)
-        .with(email: having_attributes(
+        .with(hash_including(email: having_attributes(
           subject: "Update from GOV.UK – First Subscription",
           address: "test@example.com",
-        ))
+        )))
     end
     it "the message contains the redirect URL" do
+      email_attributes = having_attributes(body: include("/redirected/path", "redirected title"))
       expect(DeliveryRequestService).to have_received(:call)
-        .with(email: having_attributes(body: include("/redirected/path", "redirected title"))).twice
+        .with(hash_including(email: email_attributes))
+        .twice
     end
     it "unsubscribes all affected subscriptions" do
       expect(@subscription.reload.ended_at).to_not be_nil
