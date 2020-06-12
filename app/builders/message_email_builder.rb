@@ -11,7 +11,7 @@ class MessageEmailBuilder
     Email.timed_bulk_insert(
       columns,
       records,
-      ProcessAndGenerateEmailsWorker::BATCH_SIZE,
+      ImmediateEmailGenerationService::BATCH_SIZE,
     )
   end
 
