@@ -175,7 +175,7 @@ This is the same as above, but exports the active subscription count of the subs
 date.
 
 ```bash
-$ bundle exec rake export:csv_from_living_in_europe
+$ bundle exec rake export:csv_from_living_in_europe[<date>]
 ```
 
 This is a convenience export which does the same as above but with all the "Living in Europe" taxon subscriber lists
