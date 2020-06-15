@@ -10,6 +10,26 @@ class SubscriptionContent < ApplicationRecord
 
   validate :presence_of_content_change_or_message
 
+  def self.populate_for_content(content, records)
+    base = case content
+           when ContentChange
+             { content_change_id: content.id }
+           when Message
+             { message_id: content.id }
+           else
+             raise ArgumentError, "Expected #{content.class.name} to be a "\
+                                  "ContentChange or a Message"
+           end
+
+    now = Time.zone.now
+
+    attributes = records.map do |record|
+      base.merge(created_at: now, updated_at: now).merge(record)
+    end
+
+    SubscriptionContent.insert_all!(attributes)
+  end
+
   def presence_of_content_change_or_message
     has_content_change = content_change_id.present? || content_change.present?
     has_message = message_id.present? || message.present?
