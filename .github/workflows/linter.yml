@@ -1,0 +1,22 @@
+name: Linter
+
+on:
+  push:
+    branches-ignore:
+      - master
+
+jobs:
+  build:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Lint
+        uses: github/super-linter@v2.0.0
+        env:
+          VALIDATE_BASH: true
+          VALIDATE_RUBY: true
+          VALIDATE_MD: true
+          VALIDATE_YAML: true
