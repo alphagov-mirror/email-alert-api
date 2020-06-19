@@ -345,7 +345,6 @@ GEM
     thread_safe (0.3.6)
     thwait (0.1.0)
     tilt (2.0.10)
-    timecop (0.9.1)
     tzinfo (1.2.7)
       thread_safe (~> 0.1)
     unf (0.1.4)
@@ -402,7 +401,6 @@ DEPENDENCIES
   rubocop-govuk
   ruby-prof (~> 1.4)
   sidekiq-scheduler (~> 3.0)
-  timecop
   webmock
   with_advisory_lock (~> 4.6)
 
