@@ -57,4 +57,18 @@ RSpec.describe ProcessMessageWorker do
       described_class.new.perform(processed_message.id)
     end
   end
+
+  describe ".perform_async" do
+    around do |example|
+      SidekiqUniqueJobs.use_config(enabled: true, logger: Logger.new("/dev/null")) do
+        # We're expecting redis-namespace to raise a warning unfortunately
+        expect { example.run }.to output.to_stderr
+      end
+    end
+
+    it "enforces job uniqueness with the correct sidekiq-unique-jobs option" do
+      expect(described_class).to receive(:uniqueness_with).with([message.id])
+      described_class.perform_async(message.id)
+    end
+  end
 end
