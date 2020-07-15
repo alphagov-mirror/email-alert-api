@@ -1,10 +1,7 @@
 class ProcessContentChangeWorker
   include Sidekiq::Worker
 
-  sidekiq_options queue: :process_and_generate_emails,
-                  lock: :until_executed,
-                  lock_args: ->(args) { [args.first] },
-                  on_conflict: :log
+  sidekiq_options queue: :process_and_generate_emails
 
   def perform(content_change_id)
     content_change = ContentChange.find(content_change_id)
