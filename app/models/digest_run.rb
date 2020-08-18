@@ -11,9 +11,9 @@ class DigestRun < ApplicationRecord
   enum range: { daily: 0, weekly: 1 }
 
   def check_if_completed
-    return if completed_at || digest_run_subscribers.incomplete_for_run(id).exists?
+    return if completed_at || digest_run_subscribers.unprocessed_for_run(id).exists?
 
-    completed_time = digest_run_subscribers.maximum(:completed_at) || Time.zone.now
+    completed_time = digest_run_subscribers.maximum(:processed_at) || Time.zone.now
     update!(completed_at: completed_time)
   end
 

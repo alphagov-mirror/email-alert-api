@@ -122,7 +122,7 @@ RSpec.describe DigestRun do
   describe "#check_if_completed" do
     let(:digest_run) { create(:digest_run) }
 
-    context "incomplete digest_run_subscribers" do
+    context "unprocessed digest_run_subscribers" do
       before { create(:digest_run_subscriber, digest_run_id: digest_run.id) }
 
       it "doesn't mark the digest run as complete" do
@@ -132,15 +132,15 @@ RSpec.describe DigestRun do
       end
     end
 
-    context "no incomplete digest_run_subscribers" do
+    context "all digest_run_subscribers are processed" do
       let(:digest_run_subscriber) do
-        create(:digest_run_subscriber, digest_run_id: digest_run.id, completed_at: Time.zone.now)
+        create(:digest_run_subscriber, digest_run_id: digest_run.id, processed_at: Time.zone.now)
       end
 
       it "marks the digest run as completed based on the digest run subscriber time" do
         expect { digest_run.check_if_completed }
           .to change { digest_run.completed_at }
-          .to(digest_run_subscriber.reload.completed_at)
+          .to(digest_run_subscriber.reload.processed_at)
       end
     end
 
