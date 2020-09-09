@@ -26,18 +26,13 @@ RSpec.describe StatusUpdateService do
                             signon_user_uid: user.uid)
     end
 
-    it "updates the email status" do
-      expect { described_class.call(args) }
-        .to(change { email.reload.status })
-    end
-
     context "when provided a 'delivered' status" do
       let(:status) { "delivered" }
 
       it "sets the delivery attempt status to delivered" do
         expect { described_class.call(args) }
-          .to change { delivery_attempt.reload.status }
-          .to("delivered")
+          .to change { delivery_attempt.reload.status }.to("delivered")
+          .and change { email.reload.finished_sending_at }.to(sent_at)
       end
     end
 
@@ -64,8 +59,8 @@ RSpec.describe StatusUpdateService do
 
       it "sets the delivery attempt status to undeliverable_failure" do
         expect { described_class.call(args) }
-          .to change { delivery_attempt.reload.status }
-          .to("undeliverable_failure")
+          .to change { delivery_attempt.reload.status }.to("undeliverable_failure")
+          .and change { email.reload.finished_sending_at }.to(sent_at)
       end
     end
 
