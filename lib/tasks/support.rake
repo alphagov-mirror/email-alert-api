@@ -44,6 +44,20 @@ namespace :support do
     pp results
   end
 
+  desc "View the status for the most recent emails for an email address
+  Usage: support:view_email_statuses[name@example.org]
+  "
+  task :view_email_statuses, %i[email_address] => :environment do |_, args|
+    email_address = args[:email_address]
+    raise ArgumentError, "Provide an email!" if email_address.blank?
+
+    query = Email.where(address: email_address)
+    puts "#{query.count} emails sent to #{email_address}:"
+    query.each do |e|
+      puts "• #{e.created_at.strftime('%l:%M%P, %-d %B %Y')}: #{e.subject} (#{e.status})"
+    end
+  end
+
   desc "Change the email address of a subscriber"
   task :change_email_address, %i[old_email_address new_email_address] => :environment do |_t, args|
     old_email_address = args[:old_email_address]
