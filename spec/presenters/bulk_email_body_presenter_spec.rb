@@ -5,7 +5,7 @@ RSpec.describe BulkEmailBodyPresenter do
       body = "something [link](%LISTURL%)."
 
       allow(PublicUrls).to receive(:url_for)
-        .with(base_path: "/url")
+        .with(base_path: %r{^/url\?utm_source=})
         .and_return("domain/url")
 
       result = described_class.call(body, subscriber_list)
