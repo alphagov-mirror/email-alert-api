@@ -18,10 +18,15 @@ namespace :data_migration do
       new_tags = (list.tags[:alert_type][:any] - [args[:from_slug]] + [args[:to_slug]]).uniq
 
       if (new_list = SubscriberList.where("tags->'alert_type' IS NOT NULL").find_all { |l| l.tags[:alert_type][:any].sort == new_tags.sort }.first) && list != new_list
+        puts "Moving #{list.slug} to #{new_list.slug}"
         SubscriberListMover.new(from_slug: list.slug, to_slug: new_list.slug)
+        puts "-----"
       else
-        list.tags = new_tags
+        puts "Updating #{list.slug}"
+        puts "Replacing tags #{list.tags[:alert_type][:any]} with #{new_tags}"
+        list.tags[:alert_type][:any] = new_tags
         list.save!
+        puts "-----"
       end
     end
   end
